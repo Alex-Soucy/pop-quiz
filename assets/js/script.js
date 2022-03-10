@@ -1,3 +1,4 @@
+// questions array with choices and correct answers
 const questions = [
     {
         questionText: "Commonly used data types DO NOT include:",
@@ -31,6 +32,7 @@ const questionCard = document.querySelector("#questions");
 const scoreCard = document.querySelector("#final-score");
 const leaderboardCard = document.querySelector("#leaderboard-card");
 
+// hide all cards
 function hideCards() {
     startCard.setAttribute("hidden", true);
     questionCard.setAttribute("hidden", true);
@@ -38,7 +40,7 @@ function hideCards() {
     leaderboardCard.setAttribute("hidden", true);
 }
 
-const resultDiv = document.querySelector("#result-div");
+const resultDiv = document.querySelector("#results");
 const resultText = document.querySelector("#result-text");
 
 function hideResultText() {
@@ -51,6 +53,7 @@ var currentQuestion;
 
 document.querySelector("#start-button").addEventListener("click", startQuiz);
 
+// remove hidden attribute from questions card and start quiz
 function startQuiz() {
     hideCards();
     questionCard.removeAttribute("hidden");
@@ -73,6 +76,7 @@ function countdown() {
     }
 }
 
+// show the timer for the quiz
 const timeDisplay = document.querySelector("#time");
 function displayTime() {
   timeDisplay.textContent = time;
@@ -139,4 +143,80 @@ const inputElement = document.querySelector("#initials");
 
 submitButton.addEventListener("click", storeScore);
 
-  
+function storeScore(event) {
+  event.preventDefault();  
+
+
+let leaderboardName = {
+  initials: inputElement.value,
+  score: time,
+};
+
+updateStoredLeaderboard(leaderboardName);
+
+hideCards();
+  leaderboardCard.removeAttribute("hidden");
+
+  renderLeaderboard();
+}
+
+function updateStoredLeaderboard(leaderboardName) {
+  let leaderboardScores = getLeaderboard();
+  leaderboardScores.push(leaderboardName);
+  localStorage.setItem("leaderboardScores", JSON.stringify(leaderboardScores));
+}
+
+function getLeaderboard() {
+  let storedLeaderboard = localStorage.getItem("leaderboardScores");
+  if (storedLeaderboard !== null) {
+    let leaderboardArray = JSON.parse(storedLeaderboard);
+    return leaderboardArray;
+  } else {
+    leaderboardArray = [];
+  }
+  return leaderboardArray;
+}
+
+function renderLeaderboard() {
+  let sortedLeaderboardArray = sortLeaderboard();
+  const leaderboardList = document.querySelector("#leaderboard-list");
+  leaderboardList.innerHTML = "";
+  for (let i = 0; i < sortedLeaderboardArray.length; i++) {
+    let leaderboardEntry = sortedLeaderboardArray[i];
+    let newListItem = document.createElement("li");
+    newListItem.textContent =
+      leaderboardEntry.initials + " - " + leaderboardEntry.score;
+    leaderboardList.append(newListItem);
+  }
+}
+
+const clearButton = document.querySelector("#clear-button");
+clearButton.addEventListener("click", clearHighscores);
+
+function clearHighscores() {
+  localStorage.clear();
+  renderLeaderboard();
+}
+
+const backButton = document.querySelector("#back-button");
+backButton.addEventListener("click", returnToStart);
+
+function returnToStart() {
+  hideCards();
+  startCard.removeAttribute("hidden");
+}
+
+const leaderboardLink = document.querySelector("#leaderboard-link");
+leaderboardLink.addEventListener("click", showLeaderboard);
+
+function showLeaderboard() {
+  hideCards();
+  leaderboardCard.removeAttribute("hidden");
+
+  clearInterval(intervalID);
+
+  time = undefined;
+  displayTime();
+
+  renderLeaderboard();
+} 
